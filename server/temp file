@@ -1,0 +1,7 @@
+create table IF NOT EXISTS login ( name varchar(20) , email varchar(40) primary key, password varchar(30) not null);
+
+create table IF NOT EXISTS device (email varchar(40) , deviceid varchar(40) not null ,hash varchar(100) , FOREIGN KEY (email) REFERENCES login(email));
+
+create table IF NOT EXISTS session( hash varchar(100) , type varchar(40) not null , start timestamp ,stop timestamp );
+
+insert into login (name,email,password) values('Sreeraj', 'sreerajmylatty@gmail.com', 'pass');
