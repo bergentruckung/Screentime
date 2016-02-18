@@ -36,8 +36,8 @@ public class SharedPrefMan {
             }
 
             session=new JSONObject();
-            session.put("screen",0);
-            session.put("start",start);
+            session.put("type","screen");
+            session.put("start",start+"");
             jsonArray.put(session);
             editor.putString("sessions",jsonArray.toString());
             editor.commit();
@@ -54,7 +54,7 @@ public class SharedPrefMan {
                 Log.i("Session","Closed object found");
                 return;
             }
-            session.put("stop",end);
+            session.put("stop",end+"");
             jsonArray.put(jsonArray.length() - 1, session);
             editor.putString("sessions", jsonArray.toString());
             editor.commit();
@@ -66,5 +66,25 @@ public class SharedPrefMan {
     public  void printSessions()
     {
         Log.i("sessions",sharedPreferences.getString("sessions","nil"));
+    }
+    public  String getSessions()
+    {
+      return sharedPreferences.getString("sessions", "[]");
+    }
+    public void addHash(String hash)
+    {
+        editor.putString("auth",hash);
+        editor.commit();
+    }
+    public String checkHash()
+    {
+        String hash=sharedPreferences.getString("auth","");
+        return hash;
+
+    }
+    public void clearSessions()
+    {
+        editor.putString("sessions","[]");
+        editor.commit();
     }
 }

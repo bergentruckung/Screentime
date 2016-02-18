@@ -3,9 +3,12 @@ package cetchoriyans.screentime;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -33,8 +36,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -70,9 +88,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(!new SharedPrefMan(this).checkHash().equals("")) {
+            if(!isMyServiceRunning(ListenerService.class))
+                startService(new Intent(getBaseContext(), ListenerService.class));
+            finish();
+        }
         setContentView(layout);
-        // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        Bundle bundle= getIntent().getExtras();
+        String emailt;
+        if(bundle!=null) {
+            emailt=bundle.getString("email");
+            if (emailt != null)
+                mEmailView.setText(emailt);
+        }
+        // Set up the login form.
+
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -300,7 +331,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, Integer> {
 
         protected final String mEmail;
         protected final String mPassword;
@@ -311,39 +342,86 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected Integer doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
+            String response;
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
+                HashMap<String,String> postDataParams=new HashMap<>();
+                postDataParams.put("user_id",mEmail);
+                postDataParams.put("device_id","Dummmy");
+                postDataParams.put("pass",mPassword);
+                URL url = new URL("http://192.168.1.57:8080/api/login");
+                URLConnection urlConn = url.openConnection();
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+                if (!(urlConn instanceof HttpURLConnection)) {
+                    throw new IOException("URL is not an Http URL");
+                }
+                HttpURLConnection httpConn = (HttpURLConnection) urlConn;
+                httpConn.setReadTimeout(15000);
+                httpConn.setConnectTimeout(15000);
+                httpConn.setRequestMethod("POST");
+                httpConn.setDoInput(true);
+                httpConn.setDoOutput(true);
+                httpConn.setRequestMethod("POST");
+
+                OutputStream os = httpConn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getPostDataString(postDataParams));
+
+                writer.flush();
+                writer.close();
+                os.close();
+
+                int resCode = httpConn.getResponseCode();
+
+                if (resCode == HttpURLConnection.HTTP_OK) {
+                    InputStream in = httpConn.getInputStream();
+                    response=readIt(in,500);
+                    Log.i("webresponse",response);
+                    if(response.equals("not_registered"))
+                        return 2;
+                    if(response.equals("wrong_password"))
+                        return 0;
+                    SharedPrefMan sharedPrefMan=new SharedPrefMan(getBaseContext());
+                    sharedPrefMan.addHash(response);
+                    return 1;
                 }
             }
 
-            return true;
+            catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return 3;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final Integer success) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
+            if (success==1) {
                 startService(new Intent(getBaseContext(),ListenerService.class));
                 finish();
 
-            } else {
+            } else if(success==0) {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
+            }
+
+            else if(success==2)
+            {
+                Intent intent=new Intent(LoginActivity.this, SignupActivity.class);
+                intent.putExtra("email",mEmail);
+                intent.putExtra("pass",mPassword);
+                startActivity(intent);
+                finish();
             }
         }
 
@@ -357,7 +435,39 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public void onDestroy()
     {
         super.onDestroy();
+        if(!isMyServiceRunning(ListenerService.class))
         startService(new Intent(getBaseContext(),ListenerService.class));
+    }
+    protected static String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for(Map.Entry<String, String> entry : params.entrySet()){
+            if (first)
+                first = false;
+            else
+                result.append("&");
+            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+        }
+        Log.i("request", result.toString());
+        return result.toString();
+    }
+    protected static String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
+        Reader reader = null;
+        reader = new InputStreamReader(stream, "UTF-8");
+        char[] buffer = new char[len];
+        reader.read(buffer);
+        return new String(buffer).trim();
+    }
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
