@@ -24,6 +24,12 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/views/home.html')
 });
 
+app.get('/demo', function(req, res) {
+    res.sendFile(__dirname + '/views/demo.html')
+});
+
+
+
 app.post('/api/android/signup/', function(req, res) {
     var user_id = req.body.user_id;
     var user_name = req.body.user_name;
@@ -79,7 +85,7 @@ app.post('/api/device/session/', function(req, res) {
 app.post('/api/windows/session/', function(req ,res){
     var hash = req.body.hash;
     var data = req.body.session_data;
-
+    console.log(req.body);
     for (var i = 0; i < data.length; i++) {
         var type = data[i].type;
         var start = data[i].start;

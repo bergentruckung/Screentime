@@ -112,7 +112,7 @@ exports.insertSessionData = function(hash, type, start, stop, callback) {
 };
 
 exports.getDeviceData = function(hash, callback) {
-    query = "select type , UNIX_TIMESTAMP(start) as START, UNIX_TIMESTAMP(stop) AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
+    query = "select type , start as START, stop AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
     connection.query(query,
         function selectCb(err, results, fields) {
             if (err) {
@@ -125,7 +125,7 @@ exports.getDeviceData = function(hash, callback) {
 };
 
 exports.getDeviceDataFull = function(hash, deviceid, callback) {
-    query = "select type , UNIX_TIMESTAMP(start) as START, UNIX_TIMESTAMP(stop) AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
+    query = "select type , start as START, stop AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
     connection.query(query,
         function selectCb(err, results, fields) {
             if (err) {
