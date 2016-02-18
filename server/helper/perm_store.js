@@ -3,8 +3,9 @@ var connection;
 
 var LOGINTABLE = 'login';
 var DEVICETABLE = 'device';
+var SESSIONTABLE = 'session';
 
-exports.initialize = function(db_host,db_user,db_pass,db_database) {
+exports.initialize = function(db_host, db_user, db_pass, db_database) {
     connection = mysql.createConnection({
         host: db_host,
         user: db_user,
@@ -21,69 +22,82 @@ exports.initialize = function(db_host,db_user,db_pass,db_database) {
     });
 };
 
-exports.signupUser = function(username , email , password) {
-    query = 'insert into '+ LOGINTABLE +' (name,email,password) values ("' + username + '", "' + email + '",  "'+  password +  '")';
+exports.signupUser = function(username, email, password) {
+    query = 'insert into ' + LOGINTABLE + ' (name,email,password) values ("' + username + '", "' + email + '",  "' + password + '")';
     connection.query(query,
-    function selectCb(err, results, fields) {
-        if (err) throw err;
-        else console.log('success');
-    });
+        function selectCb(err, results, fields) {
+            if (err) throw err;
+            else console.log('success');
+        });
 };
 
-exports.addDevice = function(emailid , deviceid){
-    query = 'insert into '+ DEVICETABLE +' (email,deviceid) values ("' + emailid  + '",  "'+  deviceid +  '")';
+exports.addDevice = function(emailid, deviceid) {
+    query = 'insert into ' + DEVICETABLE + ' (email,deviceid) values ("' + emailid + '",  "' + deviceid + '")';
     connection.query(query,
-    function selectCb(err, results, fields) {
-        if (err) throw err;
-        else console.log('success');
-    });
+        function selectCb(err, results, fields) {
+            if (err) throw err;
+            else console.log('success');
+        });
 };
 
-exports.checkLogin = function(emailid , password , callback){
-    query = 'select count(*) as solution from '+ LOGINTABLE + ' WHERE email = "' + emailid + '" AND PASSWORD = "' + password + '"';
+exports.checkLogin = function(emailid, password, callback) {
+    query = 'select count(*) as solution from ' + LOGINTABLE + ' WHERE email = "' + emailid + '" AND PASSWORD = "' + password + '"';
     console.log(query);
     connection.query(query,
-    function selectCb(err, results, fields) {
-        if (err) throw err;
-        else {
-            console.log("present : " + results[0].solution);
-            if(results[0].solution == '0'){
-                callback('failed');
-            }else{
-                callback('success');
-            } 
-        }
-    });
-};
-
-exports.checkDeviceRegistration = function(email , deviceid , callback){
-    query = 'select hash as solution from '+ DEVICETABLE + ' WHERE email = "' + email + '" AND deviceid = "' + deviceid + '"';
-    connection.query(query,
-    function selectCb(err, results, fields) {
-        if (err) throw err;
-        else {
-            if(results.length == 0){
-                callback('failed');
-            }else{
-                console.log("presented hash : " + results[0].solution);
-                callback(results[0].solution);
+        function selectCb(err, results, fields) {
+            if (err) throw err;
+            else {
+                console.log("present : " + results[0].solution);
+                if (results[0].solution == '0') {
+                    callback('failed');
+                } else {
+                    callback('success');
+                }
             }
-        }
-    });
+        });
 };
 
-exports.insertDevice = function(email , deviceid ,hash ,  callback){
+exports.checkDeviceRegistration = function(email, deviceid, callback) {
+    query = 'select hash as solution from ' + DEVICETABLE + ' WHERE email = "' + email + '" AND deviceid = "' + deviceid + '"';
+    connection.query(query,
+        function selectCb(err, results, fields) {
+            if (err) throw err;
+            else {
+                if (results.length == 0) {
+                    callback('failed');
+                } else {
+                    console.log("presented hash : " + results[0].solution);
+                    callback(results[0].solution);
+                }
+            }
+        });
+};
 
-    query = "insert into " + DEVICETABLE + " values( '" + email + "' , '"+ deviceid +"','" +hash + "')";
+exports.insertDevice = function(email, deviceid, hash, callback) {
+
+    query = "insert into " + DEVICETABLE + " values( '" + email + "' , '" + deviceid + "','" + hash + "')";
+    connection.query(query,
+        function selectCb(err, results, fields) {
+            if (err) {
+                console.log(query);
+                throw err;
+            } else {
+                callback('success');
+            }
+        });
+};
+
+exports.insertSessionData = function(hash, type, start, stop, callback) {
+    query = "insert into " + SESSIONTABLE + " values ( '" + hash + "', '" + type + "',FROM_UNIXTIME('" + start + "'),FROM_UNIXTIME('" + stop + "'))";
     console.log(query);
     connection.query(query,
-    function selectCb(err, results, fields) {
-        if (err) throw err;
-        else {
-            callback('success');
-        }
-    });
+        function selectCb(err, results, fields) {
+            if (err) {
+                console.log(query);
+                throw err;
+            } else {
+                callback('success');
+            }
+        });
+
 };
-
-
-
