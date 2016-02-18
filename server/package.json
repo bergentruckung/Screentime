@@ -1,5 +1,5 @@
 {
-  "name": "demoproject-coppermoney",
+  "name": "ScreenTime",
   "version": "1.0.0",
   "description": "ScreenTime",
   "main": "server.js",
@@ -18,6 +18,7 @@
     "express": "^4.13.3",
     "fs": "0.0.2",
     "js-yaml": "~3.3.1",
+    "md5": "^2.0.0",
     "mysql": "^2.9.0",
     "request": "^2.67.0"
   }

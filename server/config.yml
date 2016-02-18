@@ -2,12 +2,7 @@
 # apisecret: 6ea7b0de
 # phone: '918086084339'
 
-apikey: a91fde86
-apisecret: 37c1ddee
-phone: '918289903935'
-redis_host: '127.0.0.1'
-redis_port: 6379
 mysql_host: 'localhost'
 mysql_user: 'root'
 mysql_pass: 'lygubnew'
-mysql_db: 'copper'
+mysql_db: 'screentime'
