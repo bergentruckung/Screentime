@@ -41,21 +41,31 @@ exports.addDevice = function(emailid, deviceid) {
 };
 
 exports.checkLogin = function(emailid, password, callback) {
-    query = 'select count(*) as solution from ' + LOGINTABLE + ' WHERE email = "' + emailid + '" AND PASSWORD = "' + password + '"';
-    console.log(query);
+    query = 'select count(*) as solution from ' + LOGINTABLE + ' WHERE email = "' + emailid + '"';
     connection.query(query,
-        function selectCb(err, results, fields) {
-            if (err) throw err;
-            else {
-                console.log("present : " + results[0].solution);
-                if (results[0].solution == '0') {
-                    callback('failed');
-                } else {
-                    callback('success');
-                }
+    function selectCb(err, results, fields) {
+        if (err) throw err;
+        else {
+            if (results[0].solution == '0') {
+                callback('not_registered');
+            } else {
+                query = 'select count(*) as solution from ' + LOGINTABLE + ' WHERE email = "' + emailid + '" AND PASSWORD = "' + password + '"';
+                connection.query(query,
+                    function selectCb(err, results, fields) {
+                        if (err) throw err;
+                        else {
+                            if (results[0].solution == '0') {
+                                callback('wrong_password');
+                            } else {
+                                callback('success');
+                            }
+                        }
+                    });
             }
-        });
+        }
+    });
 };
+
 
 exports.checkDeviceRegistration = function(email, deviceid, callback) {
     query = 'select hash as solution from ' + DEVICETABLE + ' WHERE email = "' + email + '" AND deviceid = "' + deviceid + '"';
@@ -66,7 +76,6 @@ exports.checkDeviceRegistration = function(email, deviceid, callback) {
                 if (results.length == 0) {
                     callback('failed');
                 } else {
-                    console.log("presented hash : " + results[0].solution);
                     callback(results[0].solution);
                 }
             }
@@ -100,4 +109,38 @@ exports.insertSessionData = function(hash, type, start, stop, callback) {
             }
         });
 
+};
+
+exports.getDeviceData = function(hash, callback) {
+    query = "select type , UNIX_TIMESTAMP(start) as START, UNIX_TIMESTAMP(stop) AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
+    console.log(query);
+    connection.query(query,
+        function selectCb(err, results, fields) {
+            if (err) {
+                console.log(query);
+                throw err;
+            } else {
+                callback({ data: results });
+            }
+        });
+};
+
+exports.getUserData = function(email, callback) {
+    query = "select deviceid ,hash from " + DEVICETABLE + ' where email="' + email + '"';
+    connection.query(query,
+        function selectCb(err, results, fields) {
+            if (err) {
+                console.log(query);
+                throw err;
+            } else {
+                var data;
+                for (var i = 0; i < results.length; i++) {
+                    console.log("Device ID" + results[i].deviceid);
+                    console.log("Hash" + results[i].hash);
+                    exports.getDeviceData(results[i].hash, function(info) {
+                        // console.log(info);
+                    });
+                }
+            }
+        });
 };
