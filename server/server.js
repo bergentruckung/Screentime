@@ -48,7 +48,10 @@ app.post('/api/login', function(req, res){
 					perm_store.insertDevice(user_id,dev_id,hashValue,function(info){
 						res.send(hashValue);
 					});
+				}else{
+					res.send(info);
 				}
+
 			});	
 	}
 	});
@@ -62,7 +65,7 @@ app.post('/api/device/session/', function(req , res){
 });
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
-var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '192.168.1.57'
 
 app.listen(server_port, server_ip_address, function() {
     console.log("Listening on " + server_ip_address + "," + server_port)

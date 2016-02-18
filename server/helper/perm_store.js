@@ -30,15 +30,6 @@ exports.signupUser = function(username , email , password) {
     });
 };
 
-exports.addDevice = function(email , deviceID) {
-    query = 'insert into '+ LOGINTABLE +' (name,email,password) values ("' + username + '", "' + email + '",  "'+  password +  '")';
-    connection.query(query,
-    function selectCb(err, results, fields) {
-        if (err) throw err;
-        else console.log('success');
-    });
-};
-
 exports.addDevice = function(emailid , deviceid){
     query = 'insert into '+ DEVICETABLE +' (email,deviceid) values ("' + emailid  + '",  "'+  deviceid +  '")';
     connection.query(query,
