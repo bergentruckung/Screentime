@@ -1,0 +1,100 @@
+body {
+    background: url('../images/background.jpg');
+    background-repeat: no-repeat;
+    overflow: auto;
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin-right: 0px;
+}
+
+.logo {
+    width: 35%;
+    height: 20%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+    margin-left: 31%;
+}
+
+.content-row {
+    width: 100%;
+    height: 600px;
+    top: 120px;
+    position: absolute;
+    display: flex;
+    justify-content: space-around;
+}
+
+.balance-view {
+    width: 30%;
+    height: 500px;
+}
+
+table {
+    margin: 0 0 1.5em 0;
+    width: 100%;
+    min-width: 100%;
+}
+
+table tbody tr {
+    border: solid 1px #000000;
+    background-color: rgba(0, 0, 0, .2);
+    font-size: 1.3em;
+    text-align: center;
+    margin-left: 0;
+    margin-right: 0;
+    color: #ffffff;
+    font-family: georgia;
+}
+
+table td {
+    padding: 0.5em 0.75em;
+    text-align: center;
+}
+
+.mobile-view {
+    margin-top: -80px;
+    margin-left: -50px;
+    width: 700px;
+    height: 625px;
+}
+
+.billButton {
+    background-image: url('../images/billButton.jpg');
+    width: 62px;
+    height: 35px;
+}
+
+#balance-view {
+    margin-top: 25px;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#mobile-view {
+    background-image: url('../images/mobile.png');
+    background-repeat: no-repeat;
+}
+
+.status_text {
+    margin-left: 207pt;
+    margin-top: 30px;
+}
+
+#request_transaction {
+    margin-top: 80px;
+    margin-left: 270pt;
+}
+
+#cid_fill {
+    width: 245px;
+    margin-top: 275px;
+    margin-left: 207pt;
+}
+
+#amount_fill {
+    width: 245px;
+    margin-top: 30px;
+    margin-left: 207pt;
+}
