@@ -113,7 +113,6 @@ exports.insertSessionData = function(hash, type, start, stop, callback) {
 
 exports.getDeviceData = function(hash, callback) {
     query = "select type , UNIX_TIMESTAMP(start) as START, UNIX_TIMESTAMP(stop) AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
-    console.log(query);
     connection.query(query,
         function selectCb(err, results, fields) {
             if (err) {
@@ -121,6 +120,19 @@ exports.getDeviceData = function(hash, callback) {
                 throw err;
             } else {
                 callback({ data: results });
+            }
+        });
+};
+
+exports.getDeviceDataFull = function(hash, deviceid, callback) {
+    query = "select type , UNIX_TIMESTAMP(start) as START, UNIX_TIMESTAMP(stop) AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
+    connection.query(query,
+        function selectCb(err, results, fields) {
+            if (err) {
+                console.log(query);
+                throw err;
+            } else {
+                callback({ "hash":hash , "deviceID" : deviceid,  "data": results });
             }
         });
 };
@@ -133,12 +145,14 @@ exports.getUserData = function(email, callback) {
                 console.log(query);
                 throw err;
             } else {
-                var data;
+                var dataItems = [];
+                console.log("results: " + results.length);
                 for (var i = 0; i < results.length; i++) {
-                    console.log("Device ID" + results[i].deviceid);
-                    console.log("Hash" + results[i].hash);
-                    exports.getDeviceData(results[i].hash, function(info) {
-                        // console.log(info);
+                    exports.getDeviceDataFull(results[i].hash, results[i].deviceid , function(info) {
+                        dataItems.push(info);
+                        if(dataItems.length == results.length){
+                            callback(dataItems);
+                        }
                     });
                 }
             }

@@ -62,6 +62,7 @@ app.post('/api/login', function(req, res) {
 });
 
 app.post('/api/device/session/', function(req, res) {
+	// console.log(req.body);
     var hash = req.body.hash;
     var data = req.body.session_data;
 
@@ -73,7 +74,20 @@ app.post('/api/device/session/', function(req, res) {
         perm_store.insertSessionData(hash, type, start, stop, function(info) {});
     };
     res.send('updated');
+});
 
+app.post('/api/windows/session/', function(req ,res){
+    var hash = req.body.hash;
+    var data = req.body.session_data;
+
+    for (var i = 0; i < data.length; i++) {
+        var type = data[i].type;
+        var start = data[i].start;
+        var stop = data[i].stop;
+
+        //perm_store.insertSessionData(hash, type, start, stop, function(info) {});
+    };
+    res.send('updated');
 });
 
 app.post('/api/getDeviceDetails/', function(req, res) {
@@ -84,12 +98,14 @@ app.post('/api/getDeviceDetails/', function(req, res) {
 
 app.post('/api/getUserDetails/', function(req, res) {
     perm_store.getUserData(req.body.email, function(info) {
+    	console.log("data in server");
+    	console.log(info);
         res.send(info);
     });
 });
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
-var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '192.168.1.57'
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '192.168.43.135'
 
 app.listen(server_port, server_ip_address, function() {
     console.log("Listening on " + server_ip_address + "," + server_port)
