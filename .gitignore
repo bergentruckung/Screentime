@@ -1,0 +1,6 @@
+android/ScreenTime/.idea*
+android/ScreenTime/local*
+android/ScreenTime/*.iml
+android/ScreenTime/build*
+android/ScreenTime/libs*
+
