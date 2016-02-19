@@ -40,8 +40,8 @@ $(document).ready(function() {
             labels: timeinhours,
             datasets: [{
                 label: "My First dataset",
-                fillColor: "rgba(220,220,220,0.2)",
-                strokeColor: "rgba(220,220,220,1)",
+                fillColor: "rgba(61,245,0,0.3)",
+                strokeColor: "rgba(46,184,0,1)",
                 pointColor: "rgba(220,220,220,1)",
                 pointStrokeColor: "#fff",
                 pointHighlightFill: "#fff",
@@ -49,13 +49,14 @@ $(document).ready(function() {
                 data: timeinminutes[0]
             }, {
                 label: "My Second dataset",
-                fillColor: "rgba(151,187,205,0.2)",
+                fillColor: "rgba(46,0,255,0.2)",
                 strokeColor: "rgba(151,187,205,1)",
                 pointColor: "rgba(151,187,205,1)",
                 pointStrokeColor: "#fff",
                 pointHighlightFill: "#fff",
                 pointHighlightStroke: "rgba(151,187,205,1)",
                 data: timeinminutes[1]
+                // data: [2,3,6,23,34,45,60,23,10,20,23,34,23,32,12,12,12,12,12,0,0,0,0]
             }]
         };
 

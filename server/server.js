@@ -158,8 +158,6 @@ app.post('/api/getDeviceDetails/', function(req, res) {
 
 app.post('/api/getUserDetails/', function(req, res) {
     perm_store.getUserData(req.body.email, function(info) {
-    	console.log("data in server");
-    	console.log(info);
         res.send(info);
     });
 });
