@@ -13,8 +13,8 @@ $(document).ready(function() {
         }
     }
 
-    var viewDate = new Date(2016, 1, 18);
-    $.post("api/getUserDetails/", { email: 'sreeraj@m.com' }, function(data) {
+    var viewDate = new Date(2016, 1, 19);
+    $.post("api/getUserDetails/", { email: 'josepjoice@gmail.com' }, function(data) {
         for (i = 0, len1 = data.length; i < len1; i++) {
             for (j = 0, len2 = data[i].data.length; j < len2; j++) {
 

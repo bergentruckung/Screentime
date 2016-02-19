@@ -97,6 +97,9 @@ exports.insertDevice = function(email, deviceid, hash, callback) {
 };
 
 exports.insertSessionData = function(hash, type, start, stop, callback) {
+    start = start.substr(0, start.length -3);
+    stop = stop.substr(0, stop.length -3);
+
     query = "insert into " + SESSIONTABLE + " values ( '" + hash + "', '" + type + "',FROM_UNIXTIME('" + start + "'),FROM_UNIXTIME('" + stop + "'))";
     console.log(query);
     connection.query(query,
@@ -112,14 +115,16 @@ exports.insertSessionData = function(hash, type, start, stop, callback) {
 };
 
 exports.getDeviceData = function(hash, callback) {
-    query = "select type , start as START, stop AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
+    query = "select type , start as START, stop AS STOP from " + SESSIONTABLE + " where hash = '" + hash.trim() + "'";
+    console.log(query);
     connection.query(query,
         function selectCb(err, results, fields) {
+
             if (err) {
                 console.log(query);
                 throw err;
             } else {
-                callback({ data: results });
+                callback({ 'data': results });
             }
         });
 };

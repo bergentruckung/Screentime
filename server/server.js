@@ -18,6 +18,7 @@ app.use(bodyParser.urlencoded({
 })); // for parsing application/x-www-form-urlencoded
 
 
+var listprocess = ["atom","firefox" ,"Brackets", "cmd", "OneDrive" , "powershell" , "notepad"];
 perm_store.initialize(config.mysql_host, config.mysql_user, config.mysql_pass, config.mysql_db);
 
 app.get('/', function(req, res) {
@@ -35,12 +36,13 @@ app.post('/api/android/signup/', function(req, res) {
     var user_name = req.body.user_name;
     var pass = req.body.pass;
 
+    console.log(req.body);
     perm_store.checkLogin(user_id, pass, function(info) {
-        if (info == 'failed') {
+        if (info == 'not_registered') {
             perm_store.signupUser(user_name, user_id, pass);
             res.send('done');
         } else {
-            res.send('User with same mail id already exist');
+            res.send('failed');
         }
     });
 });
@@ -82,17 +84,69 @@ app.post('/api/device/session/', function(req, res) {
     res.send('updated');
 });
 
-app.post('/api/windows/session/', function(req ,res){
-    var hash = req.body.hash;
-    var data = req.body.session_data;
-    console.log(req.body);
-    for (var i = 0; i < data.length; i++) {
-        var type = data[i].type;
-        var start = data[i].start;
-        var stop = data[i].stop;
+function test(data){
+    
+    console.log(data);
 
-        //perm_store.insertSessionData(hash, type, start, stop, function(info) {});
-    };
+    var hash;
+    console.log(data.length);
+    for (var i=0;i<data.length ;i++){
+        if(data.charAt(i) == '\"'){
+            startHash = i+1;
+            while(data.charAt(++i) != '\"');
+            hash = data.substr(startHash, i-startHash);
+            console.log('hash:' + hash);
+            break;
+        }
+    }
+    var type,ptype;
+    for (;i<data.length ;i++){
+        if(data.charAt(i) == '\"'){
+            var startString = i;
+            while(data.charAt(++i) != '\"' && i<= data.length);
+            if(i >= data.length){
+                break;
+            }
+            session = data.substr(startString+1, i-startString-1);
+            var sessionParameters = session.split(" ");
+            if(sessionParameters.length == 3){
+                type = sessionParameters[0];
+                if(type === ptype){
+                    //discarding
+                }else{
+                    console.log('accepting ' + type);
+                    if(listprocess.indexOf(type) != -1){
+                        startTime = sessionParameters[1].split('.')[0];
+                        var hr,min,sec,msec;
+                        timeElapsed = sessionParameters[2].split('.');
+                        if(timeElapsed.length == 2){
+                            day = 0;
+                            hr = parseInt(timeElapsed[0].substr(0,2)) 
+                            min = parseInt(timeElapsed[0].substr(3,2));
+                            sec = parseInt(timeElapsed[0].substr(6,2));
+                        }else if(timeElapsed.length == 3){
+                            day = parseInt(timeElapsed[0]);
+                            hr =parseInt(timeElapsed[1].substr(0,2));
+                            min = parseInt(timeElapsed[1].substr(3,2));
+                            sec = parseInt(timeElapsed[1].substr(6,2));
+                        }
+                        duration = sec + min*60  + hr*60*60 + day*24*60*60;
+                        endTime = parseInt(startTime) + duration;
+                        perm_store.insertSessionData(hash,type, startTime, endTime, function(info){
+
+                        });
+                    }
+                }
+                ptype = type;
+            }
+        }
+    }
+}
+
+app.post('/api/windows/session/', function(req ,res){
+    console.log();
+    test(JSON.stringify(req.body));
+
     res.send('updated');
 });
 
@@ -116,3 +170,4 @@ var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '192.168.43.135'
 app.listen(server_port, server_ip_address, function() {
     console.log("Listening on " + server_ip_address + "," + server_port)
 });
+
