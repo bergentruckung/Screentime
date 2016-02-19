@@ -41,21 +41,31 @@ exports.addDevice = function(emailid, deviceid) {
 };
 
 exports.checkLogin = function(emailid, password, callback) {
-    query = 'select count(*) as solution from ' + LOGINTABLE + ' WHERE email = "' + emailid + '" AND PASSWORD = "' + password + '"';
-    console.log(query);
+    query = 'select count(*) as solution from ' + LOGINTABLE + ' WHERE email = "' + emailid + '"';
     connection.query(query,
-        function selectCb(err, results, fields) {
-            if (err) throw err;
-            else {
-                console.log("present : " + results[0].solution);
-                if (results[0].solution == '0') {
-                    callback('failed');
-                } else {
-                    callback('success');
-                }
+    function selectCb(err, results, fields) {
+        if (err) throw err;
+        else {
+            if (results[0].solution == '0') {
+                callback('not_registered');
+            } else {
+                query = 'select count(*) as solution from ' + LOGINTABLE + ' WHERE email = "' + emailid + '" AND PASSWORD = "' + password + '"';
+                connection.query(query,
+                    function selectCb(err, results, fields) {
+                        if (err) throw err;
+                        else {
+                            if (results[0].solution == '0') {
+                                callback('wrong_password');
+                            } else {
+                                callback('success');
+                            }
+                        }
+                    });
             }
-        });
+        }
+    });
 };
+
 
 exports.checkDeviceRegistration = function(email, deviceid, callback) {
     query = 'select hash as solution from ' + DEVICETABLE + ' WHERE email = "' + email + '" AND deviceid = "' + deviceid + '"';
@@ -66,7 +76,6 @@ exports.checkDeviceRegistration = function(email, deviceid, callback) {
                 if (results.length == 0) {
                     callback('failed');
                 } else {
-                    console.log("presented hash : " + results[0].solution);
                     callback(results[0].solution);
                 }
             }
@@ -88,6 +97,9 @@ exports.insertDevice = function(email, deviceid, hash, callback) {
 };
 
 exports.insertSessionData = function(hash, type, start, stop, callback) {
+    start = start.substr(0, start.length -3);
+    stop = stop.substr(0, stop.length -3);
+
     query = "insert into " + SESSIONTABLE + " values ( '" + hash + "', '" + type + "',FROM_UNIXTIME('" + start + "'),FROM_UNIXTIME('" + stop + "'))";
     console.log(query);
     connection.query(query,
@@ -100,4 +112,54 @@ exports.insertSessionData = function(hash, type, start, stop, callback) {
             }
         });
 
+};
+
+exports.getDeviceData = function(hash, callback) {
+    query = "select type , start as START, stop AS STOP from " + SESSIONTABLE + " where hash = '" + hash.trim() + "'";
+    console.log(query);
+    connection.query(query,
+        function selectCb(err, results, fields) {
+
+            if (err) {
+                console.log(query);
+                throw err;
+            } else {
+                callback({ 'data': results });
+            }
+        });
+};
+
+exports.getDeviceDataFull = function(hash, deviceid, callback) {
+    query = "select type , start as START, stop AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
+    connection.query(query,
+        function selectCb(err, results, fields) {
+            if (err) {
+                console.log(query);
+                throw err;
+            } else {
+                callback({ "hash":hash , "deviceID" : deviceid,  "data": results });
+            }
+        });
+};
+
+exports.getUserData = function(email, callback) {
+    query = "select deviceid ,hash from " + DEVICETABLE + ' where email="' + email + '"';
+    connection.query(query,
+        function selectCb(err, results, fields) {
+            if (err) {
+                console.log(query);
+                throw err;
+            } else {
+                var dataItems = [];
+                console.log("results: " + results.length);
+                for (var i = 0; i < results.length; i++) {
+                    exports.getDeviceDataFull(results[i].hash, results[i].deviceid , function(info) {
+                        dataItems.push(info);
+                        if(dataItems.length == results.length){
+                            callback(dataItems);
+                        }
+                    });
+                }
+            }
+        });
 };
