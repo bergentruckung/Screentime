@@ -48,9 +48,19 @@ public class SendData extends Service {
         SendTask() {
             sharedPrefMan=new SharedPrefMan(getBaseContext());
           jsonObject=new JSONObject();
+            JSONArray jsonArray=null;
+
             try {
+                jsonArray=new JSONArray(sharedPrefMan.getSessions());
                 jsonObject.put("hash",sharedPrefMan.checkHash());
-                jsonObject.put("session_data",new JSONArray(sharedPrefMan.getSessions()));
+                JSONArray jsonArray1=new JSONArray(sharedPrefMan.getProcesses());
+                for (int i=0;i<jsonArray1.length();i++)
+                    jsonArray.put(jsonArray1.get(i));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                jsonObject.put("session_data",jsonArray);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -62,7 +72,7 @@ public class SendData extends Service {
             String response;
             try {
 
-                URL url = new URL("http://192.168.1.57:8080/api/device/session");
+                URL url = new URL(Constants.getUrl()+"/api/device/session");
                 URLConnection urlConn = url.openConnection();
 
                 if (!(urlConn instanceof HttpURLConnection)) {

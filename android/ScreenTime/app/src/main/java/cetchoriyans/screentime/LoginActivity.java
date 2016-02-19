@@ -89,8 +89,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(!new SharedPrefMan(this).checkHash().equals("")) {
-            if(!isMyServiceRunning(ListenerService.class))
+            if(!isMyServiceRunning(ListenerService.class)) {
+
                 startService(new Intent(getBaseContext(), ListenerService.class));
+                Log.i("location","startservice listenerservice");
+            }
             finish();
         }
         setContentView(layout);
@@ -351,7 +354,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 postDataParams.put("user_id",mEmail);
                 postDataParams.put("device_id","Dummmy");
                 postDataParams.put("pass",mPassword);
-                URL url = new URL("http://192.168.1.57:8080/api/login");
+                URL url = new URL(Constants.getUrl()+"/api/login");
                 URLConnection urlConn = url.openConnection();
 
                 if (!(urlConn instanceof HttpURLConnection)) {
@@ -435,7 +438,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public void onDestroy()
     {
         super.onDestroy();
-        if(!isMyServiceRunning(ListenerService.class))
+        if(!isMyServiceRunning(ListenerService.class)&& !new SharedPrefMan(getBaseContext()).checkHash().equals(""))
         startService(new Intent(getBaseContext(),ListenerService.class));
     }
     protected static String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {

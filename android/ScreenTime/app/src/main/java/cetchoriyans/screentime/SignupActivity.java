@@ -99,7 +99,7 @@ public class SignupActivity extends LoginActivity{
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            signupTask= new SignupTask(email, password,confirm,name);
+            signupTask= new SignupTask(email, name,password);
             signupTask.execute((Void) null);
         }
     }
@@ -113,7 +113,7 @@ public class SignupActivity extends LoginActivity{
         protected final String mPassword;
         protected final String mName;
 
-        SignupTask(String email, String name,String password,String confirm) {
+        SignupTask(String email, String name,String password) {
             mEmail = email;
             mPassword = password;
             mName=name;
@@ -127,7 +127,7 @@ public class SignupActivity extends LoginActivity{
                 postDataParams.put("user_id",mEmail);
                 postDataParams.put("user_name",mName);
                 postDataParams.put("pass",mPassword);
-                URL url = new URL("http://192.168.1.57:8080/api/android/signup");
+                URL url = new URL(Constants.getUrl()+"/api/android/signup");
                 URLConnection urlConn = url.openConnection();
 
                 if (!(urlConn instanceof HttpURLConnection)) {
@@ -154,8 +154,10 @@ public class SignupActivity extends LoginActivity{
 
                 if (resCode == HttpURLConnection.HTTP_OK) {
                     InputStream in = httpConn.getInputStream();
-                    response=readIt(in,Integer.MAX_VALUE);
+                    response=readIt(in,500);
                     Log.i("webresponse",response);
+                    if(response.equals("done"))
+                    return true;
                 }
             }
 
@@ -168,7 +170,7 @@ public class SignupActivity extends LoginActivity{
             }
 
 
-            return true;
+            return false;
         }
 
         @Override
