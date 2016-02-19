@@ -71,6 +71,10 @@ public class SharedPrefMan {
     {
       return sharedPreferences.getString("sessions", "[]");
     }
+    public  String getProcesses()
+    {
+        return sharedPreferences.getString("processes", "[]");
+    }
     public void addHash(String hash)
     {
         editor.putString("auth",hash);
@@ -82,9 +86,46 @@ public class SharedPrefMan {
         return hash;
 
     }
+    public void addProcess(String process,long time)
+    {
+        if(process==null)
+            return;
+        JSONArray jsonArray=null;
+        try {
+             jsonArray=new JSONArray(sharedPreferences.getString("processes","[]"));
+            JSONObject session=jsonArray.getJSONObject(jsonArray.length()-1);
+            if(session.getString("type").equals(process)) {
+                session.put("stop",time+"");
+                jsonArray.put(jsonArray.length() - 1, session);
+                editor.putString("processes", jsonArray.toString());
+                editor.commit();
+                return;
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+
+        JSONObject jsonObject=new JSONObject();
+        try {
+            jsonObject.put("type", process);
+            jsonObject.put("start", time+"");
+            jsonObject.put("stop",time+30+"");
+            jsonArray.put(jsonObject);
+        }catch(Exception e)
+        {
+
+        }
+        editor.putString("processes",jsonArray.toString());
+        editor.commit();
+        return;
+
+    }
     public void clearSessions()
     {
         editor.putString("sessions","[]");
+        editor.putString("processes","[]");
         editor.commit();
     }
 }
