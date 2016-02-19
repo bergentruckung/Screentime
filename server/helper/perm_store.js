@@ -97,9 +97,6 @@ exports.insertDevice = function(email, deviceid, hash, callback) {
 };
 
 exports.insertSessionData = function(hash, type, start, stop, callback) {
-    start = start.substr(0, start.length -3);
-    stop = stop.substr(0, stop.length -3);
-
     query = "insert into " + SESSIONTABLE + " values ( '" + hash + "', '" + type + "',FROM_UNIXTIME('" + start + "'),FROM_UNIXTIME('" + stop + "'))";
     console.log(query);
     connection.query(query,
