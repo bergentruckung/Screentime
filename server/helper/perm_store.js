@@ -126,6 +126,19 @@ exports.getDeviceData = function(hash, callback) {
         });
 };
 
+exports.getAllProcess = function(callback){
+    query = "select * from session order by type asc";
+    connection.query(query,
+        function selectCb(err, results, fields) {
+            if (err) {
+                console.log(query);
+                throw err;
+            } else {
+                callback(results);
+            }
+        });
+};
+
 exports.getDeviceDataFull = function(hash, deviceid, callback) {
     query = "select type , start as START, stop AS STOP from " + SESSIONTABLE + " where hash = '" + hash + "'";
     connection.query(query,

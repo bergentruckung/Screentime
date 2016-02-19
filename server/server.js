@@ -29,7 +29,9 @@ app.get('/demo', function(req, res) {
     res.sendFile(__dirname + '/views/demo.html')
 });
 
-
+app.get('/demo2', function(req, res) {
+    res.sendFile(__dirname + '/views/demo2.html')
+});
 
 app.post('/api/android/signup/', function(req, res) {
     var user_id = req.body.user_id;
@@ -46,6 +48,8 @@ app.post('/api/android/signup/', function(req, res) {
         }
     });
 });
+
+
 
 app.post('/api/login', function(req, res) {
     var user_id = req.body.user_id;
@@ -148,6 +152,13 @@ app.post('/api/windows/session/', function(req ,res){
     test(JSON.stringify(req.body));
 
     res.send('updated');
+});
+
+app.post('/api/getAllProcess/', function(req,res){
+
+    perm_store.getAllProcess(function(info){
+        res.send(info);
+    });
 });
 
 app.post('/api/getDeviceDetails/', function(req, res) {
