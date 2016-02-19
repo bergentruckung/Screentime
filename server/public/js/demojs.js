@@ -56,12 +56,12 @@ $(document).ready(function() {
                 pointHighlightFill: "#fff",
                 pointHighlightStroke: "rgba(151,187,205,1)",
                 data: timeinminutes[1]
-                // data: [2,3,6,23,34,45,60,23,10,20,23,34,23,32,12,12,12,12,12,0,0,0,0]
             }]
         };
 
         var myLineChart = new Chart(ctx).Line(data, {
-            bezierCurve: false
+            bezierCurve: false,
+                legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
         });
 
     });
